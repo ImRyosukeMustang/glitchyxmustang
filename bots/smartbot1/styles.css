@@ -1,0 +1,686 @@
+/* =========================================================
+   THEME VARIABLES — tweak colors, fonts, and sizes here
+   ========================================================= */
+:root {
+    --bg:        #03060a;
+    --panel:     #060b10;
+    --panel-2:   #070d12;
+    --line:      rgba(0, 255, 156, .12);
+    --line-str:  rgba(0, 255, 156, .28);
+    --fg:        #7dffc4;
+    --fg-bright: #b6ffe0;
+    --fg-dim:    #3f7a63;
+    --fg-mute:   #1f4a3c;
+    --accent:    #00ff9c;
+    --cyan:      #4de2ff;
+    --warn:      #ffb454;
+    --err:       #ff4f66;
+    --glow:      0 0 10px rgba(0, 255, 156, .35);
+    --mono: ui-monospace, "SFMono-Regular", "JetBrains Mono", Menlo,
+            Consolas, "Liberation Mono", monospace;
+
+    --app-max-width: 1000px;
+    --app-max-height: 90vh;
+
+    /* ---------- derived motion + depth tokens ---------- */
+    --glow-sm:   0 0 6px  rgba(0, 255, 156, .38);
+    --glow-md:   0 0 14px rgba(0, 255, 156, .35);
+    --glow-lg:   0 0 34px rgba(0, 255, 156, .28);
+
+    --ease-out-soft:    cubic-bezier(.22, 1, .36, 1);
+    --ease-in-out-soft: cubic-bezier(.65, 0, .35, 1);
+    --ease-spring:      cubic-bezier(.34, 1.56, .64, 1);
+
+    --t-fast: 160ms;
+    --t-med:  320ms;
+    --t-slow: 640ms;
+}
+
+/* =========================================================
+   RESET & BASE
+   ========================================================= */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+
+body {
+    position: relative;
+    background:
+        radial-gradient(1200px 600px at 50% -10%, rgba(0, 255, 156, .07), transparent 70%),
+        radial-gradient(900px 500px at 85% 110%, rgba(77, 226, 255, .05), transparent 70%),
+        radial-gradient(700px 400px at 15% 90%, rgba(0, 255, 156, .03), transparent 70%),
+        var(--bg);
+    color: var(--fg);
+    font-family: var(--mono);
+    font-size: 13.5px;
+    line-height: 1.6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 22px;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+/* =========================================================
+   AMBIENT BACKGROUND — animated grid + drifting dust + noise
+   (uses body pseudo-elements, position:fixed so they don't
+    interfere with the flex layout)
+   ========================================================= */
+body::before {
+    content: "";
+    position: fixed;
+    inset: -10%;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+        linear-gradient(rgba(0, 255, 156, .045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 156, .045) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(ellipse at center, black 25%, transparent 78%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 25%, transparent 78%);
+    animation: gridDrift 60s linear infinite;
+    opacity: .55;
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background-image:
+        radial-gradient(1px 1px at 12% 22%, rgba(0, 255, 156, .55), transparent 60%),
+        radial-gradient(1px 1px at 78% 41%, rgba(77, 226, 255, .45), transparent 60%),
+        radial-gradient(1px 1px at 34% 78%, rgba(0, 255, 156, .35), transparent 60%),
+        radial-gradient(1px 1px at 61% 12%, rgba(0, 255, 156, .40), transparent 60%),
+        radial-gradient(1px 1px at 88% 82%, rgba(77, 226, 255, .30), transparent 60%),
+        radial-gradient(1px 1px at 6%  58%, rgba(0, 255, 156, .30), transparent 60%);
+    animation: dustDrift 34s ease-in-out infinite;
+    opacity: .9;
+}
+
+@keyframes gridDrift {
+    0%   { background-position: 0 0, 0 0; }
+    100% { background-position: 44px 44px, 44px 44px; }
+}
+
+@keyframes dustDrift {
+    0%, 100% { transform: translate3d(0, 0, 0); opacity: .9; }
+    50%      { transform: translate3d(-12px, 8px, 0); opacity: .55; }
+}
+
+/* =========================================================
+   CRT OVERLAYS
+   ========================================================= */
+.scanlines, .sweep, .vignette {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 90;
+}
+
+.scanlines {
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            rgba(255, 255, 255, .022) 0 1px,
+            transparent 1px 3px
+        ),
+        repeating-linear-gradient(
+            to bottom,
+            rgba(0, 255, 156, .012) 0 2px,
+            transparent 2px 6px
+        );
+    mix-blend-mode: screen;
+}
+
+.sweep {
+    background: linear-gradient(
+        to bottom,
+        transparent,
+        rgba(0, 255, 156, .04) 45%,
+        rgba(0, 255, 156, .055) 50%,
+        rgba(0, 255, 156, .04) 55%,
+        transparent
+    );
+    height: 220px;
+    inset: auto 0 auto 0;
+    animation: sweep 8s linear infinite;
+    filter: blur(.5px);
+}
+@keyframes sweep {
+    0%   { top: -220px; }
+    100% { top: 100%; }
+}
+
+.vignette {
+    background: radial-gradient(
+        ellipse at center,
+        transparent 42%,
+        rgba(0, 0, 0, .55) 82%,
+        rgba(0, 0, 0, .78) 100%
+    );
+}
+
+/* =========================================================
+   APP SHELL — boot-in, layered depth, animated corner brackets
+   ========================================================= */
+.app {
+    position: relative;
+    z-index: 2;
+    width: min(var(--app-max-width), 100%);
+    height: min(840px, var(--app-max-height));
+    display: flex;
+    flex-direction: column;
+    background:
+        linear-gradient(180deg, rgba(6, 14, 18, .98), rgba(4, 9, 12, .995));
+    border: 1px solid var(--line-str);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, .75),
+        0 0 0 2px rgba(0, 255, 156, .04),
+        0 40px 90px rgba(0, 0, 0, .85),
+        0 12px 40px rgba(0, 0, 0, .6),
+        0 0 70px rgba(0, 255, 156, .06),
+        inset 0 0 90px rgba(0, 255, 156, .03),
+        inset 0 1px 0 rgba(0, 255, 156, .06);
+    animation: appBoot 900ms var(--ease-out-soft) both;
+    will-change: transform, opacity, filter;
+}
+
+@keyframes appBoot {
+    0%   { opacity: 0; transform: scale(.955) translateY(16px); filter: blur(7px) brightness(2.2); }
+    35%  { opacity: 1; filter: blur(2.5px) brightness(1.5); }
+    65%  { transform: scale(1.004) translateY(-2px); filter: blur(0) brightness(1.06); }
+    100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0) brightness(1); }
+}
+
+/* Corner brackets — animate in with a draw effect */
+.app::before, .app::after {
+    content: "";
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    border: 1px solid var(--accent);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 5;
+    filter: drop-shadow(0 0 6px rgba(0, 255, 156, .55));
+    animation: cornerIn 700ms var(--ease-out-soft) 620ms both;
+}
+.app::before {
+    top: -1px; left: -1px;
+    border-right: 0; border-bottom: 0;
+    transform-origin: top left;
+}
+.app::after {
+    bottom: -1px; right: -1px;
+    border-left: 0; border-top: 0;
+    transform-origin: bottom right;
+}
+
+@keyframes cornerIn {
+    0%   { opacity: 0; width: 0;    height: 0;   }
+    45%  { opacity: 1; width: 22px; height: 2px; }
+    100% { opacity: .7; width: 22px; height: 22px; }
+}
+
+/* =========================================================
+   TOP BAR — animated sweep + refined LED + glitchy brand
+   ========================================================= */
+.topbar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--line);
+    background:
+        linear-gradient(180deg, rgba(0, 255, 156, .06), transparent 85%);
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    flex: none;
+    overflow: hidden;
+}
+
+/* faint moving highlight across the bar */
+.topbar::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(0, 255, 156, .10) 45%,
+        rgba(0, 255, 156, .18) 50%,
+        rgba(0, 255, 156, .10) 55%,
+        transparent 100%
+    );
+    transform: translateX(-100%);
+    animation: topbarSweep 9s ease-in-out 1.4s infinite;
+    mix-blend-mode: screen;
+}
+
+@keyframes topbarSweep {
+    0%   { transform: translateX(-100%); opacity: 0; }
+    10%  { opacity: 1; }
+    45%  { transform: translateX(100%); opacity: 0; }
+    100% { transform: translateX(100%); opacity: 0; }
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--fg-bright);
+    text-shadow:
+        0 0 10px rgba(0, 255, 156, .40),
+        0.5px 0 0 rgba(255, 79, 102, .18),
+        -0.5px 0 0 rgba(77, 226, 255, .18);
+    transition: text-shadow var(--t-med) var(--ease-out-soft);
+}
+
+.brand:hover {
+    text-shadow:
+        0 0 16px rgba(0, 255, 156, .70),
+        1px 0 0 rgba(255, 79, 102, .35),
+        -1px 0 0 rgba(77, 226, 255, .35);
+}
+
+.brand .proto { color: var(--fg-mute); }
+.brand .ver {
+    color: var(--fg-mute);
+    font-size: 10px;
+    letter-spacing: .1em;
+}
+
+/* LED with heartbeat ripple */
+.led {
+    position: relative;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow:
+        0 0 8px var(--accent),
+        0 0 14px rgba(0, 255, 156, .55);
+    animation: pulse 2.2s ease-in-out infinite;
+    flex: none;
+}
+
+.led::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 255, 156, .65);
+    animation: ledRing 2.2s ease-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1;    transform: scale(1); }
+    50%      { opacity: .28;  transform: scale(.85); }
+}
+
+@keyframes ledRing {
+    0%   { transform: scale(.6); opacity: .9; }
+    70%  { transform: scale(2.2); opacity: 0; }
+    100% { transform: scale(2.2); opacity: 0; }
+}
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    color: var(--fg-dim);
+}
+.topbar-right .live {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--fg);
+}
+
+/* =========================================================
+   WORKSPACE & TERMINAL — recessed depth + inner scan grid
+   ========================================================= */
+.workspace {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+}
+
+.terminal {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background:
+        radial-gradient(120% 60% at 50% -10%, rgba(0, 255, 156, .035), transparent 60%),
+        linear-gradient(180deg, rgba(4, 10, 14, .95), rgba(3, 8, 11, .98));
+    box-shadow:
+        inset 0 1px 0 rgba(0, 255, 156, .035),
+        inset 0 -1px 0 rgba(0, 0, 0, .5);
+}
+
+/* faint inner dot grid on the terminal */
+.terminal::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+        radial-gradient(rgba(0, 255, 156, .035) 1px, transparent 1.4px);
+    background-size: 22px 22px;
+    opacity: .45;
+    mask-image: linear-gradient(180deg, black 0%, transparent 92%);
+    -webkit-mask-image: linear-gradient(180deg, black 0%, transparent 92%);
+}
+
+.log {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 18px 18px 6px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 255, 156, .22) transparent;
+    scroll-behavior: smooth;
+}
+.log::-webkit-scrollbar { width: 8px; }
+.log::-webkit-scrollbar-track { background: transparent; }
+.log::-webkit-scrollbar-thumb {
+    background:
+        linear-gradient(180deg,
+            rgba(0, 255, 156, .22),
+            rgba(0, 255, 156, .10));
+    border-radius: 4px;
+    transition: background var(--t-med) var(--ease-out-soft);
+}
+.log::-webkit-scrollbar-thumb:hover {
+    background:
+        linear-gradient(180deg,
+            rgba(0, 255, 156, .45),
+            rgba(0, 255, 156, .22));
+}
+
+/* =========================================================
+   LOG LINES — bright flash + slide-in
+   ========================================================= */
+.line {
+    display: flex;
+    gap: 10px;
+    padding: 1.5px 0;
+    animation: lineIn .28s var(--ease-out-soft);
+    will-change: transform, opacity, filter;
+}
+
+@keyframes lineIn {
+    0% {
+        opacity: 0;
+        transform: translateY(4px);
+        filter: brightness(2.4) blur(1.5px);
+    }
+    55% {
+        opacity: 1;
+        filter: brightness(1.25) blur(0);
+    }
+    100% {
+        opacity: 1;
+        transform: none;
+        filter: brightness(1) blur(0);
+    }
+}
+
+.ts  { flex: none; color: var(--fg-mute); font-size: 12px; user-select: none; }
+.tag { flex: none; font-size: 12px; user-select: none; }
+.txt {
+    flex: 1;
+    min-width: 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.line.sys  .txt {
+    color: var(--fg-dim);
+    text-shadow: 0 0 4px rgba(0, 255, 156, .10);
+}
+.line.user .tag {
+    color: var(--accent);
+    text-shadow:
+        0 0 10px rgba(0, 255, 156, .55),
+        0 0 2px rgba(0, 255, 156, .9);
+}
+.line.user .txt { color: var(--fg-bright); }
+.line.bot  .tag {
+    color: var(--cyan);
+    text-shadow: 0 0 9px rgba(77, 226, 255, .35);
+}
+.line.bot  .txt {
+    color: var(--fg);
+    text-shadow: 0 0 9px rgba(0, 255, 156, .16);
+}
+.line.err  .tag {
+    color: var(--err);
+    text-shadow: 0 0 9px rgba(255, 79, 102, .45);
+}
+.line.err  .txt {
+    color: var(--err);
+    text-shadow: 0 0 9px rgba(255, 79, 102, .22);
+}
+
+/* =========================================================
+   LOADING SPINNER — whole-line, richer glow + soft ring
+   ========================================================= */
+.spinner-line {
+    animation: lineIn .18s var(--ease-out-soft);
+    transition: opacity var(--t-fast) linear;
+}
+.spinner-line .spinner-tag {
+    color: var(--accent);
+    text-shadow:
+        0 0 8px rgba(0, 255, 156, .65),
+        0 0 16px rgba(0, 255, 156, .35);
+    display: inline-block;
+    min-width: 1.1ch;
+    text-align: center;
+    animation: spinnerGlow 1.5s ease-in-out infinite;
+}
+@keyframes spinnerGlow {
+    0%, 100% { opacity: 1;   filter: drop-shadow(0 0 3px rgba(0, 255, 156, .55)); }
+    50%      { opacity: .55; filter: drop-shadow(0 0 6px rgba(0, 255, 156, .85)); }
+}
+.spinner-line .txt {
+    font-style: italic;
+    letter-spacing: .02em;
+    color: var(--fg-dim);
+    transition: color var(--t-med) var(--ease-out-soft);
+}
+
+/* =========================================================
+   INLINE SPINNER — mid-typing micro-pause indicator
+   ========================================================= */
+.inline-spinner {
+    display: inline-block;
+    margin-left: .55em;
+    color: var(--accent);
+    text-shadow:
+        0 0 9px rgba(0, 255, 156, .75),
+        0 0 18px rgba(0, 255, 156, .40);
+    animation: inlineSpinnerPulse 1.4s ease-in-out infinite;
+    font-style: normal;
+    will-change: opacity, filter;
+}
+
+@keyframes inlineSpinnerPulse {
+    0%, 100% {
+        opacity: 1;
+        filter: drop-shadow(0 0 4px rgba(0, 255, 156, .7));
+    }
+    50% {
+        opacity: .35;
+        filter: drop-shadow(0 0 9px rgba(0, 255, 156, 1));
+    }
+}
+
+/* =========================================================
+   PROMPT — focus ring, animated ps1, block caret
+   ========================================================= */
+.prompt {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 18px;
+    border-top: 1px solid var(--line);
+    background: linear-gradient(180deg, rgba(0, 255, 156, .015), rgba(0, 255, 156, .035));
+    flex: none;
+    transition: background var(--t-med) var(--ease-out-soft);
+}
+
+/* animated top edge that lights up on focus */
+.prompt::before {
+    content: "";
+    position: absolute;
+    top: -1px; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--accent) 50%,
+        transparent
+    );
+    opacity: 0;
+    transition: opacity var(--t-med) var(--ease-out-soft);
+    filter: drop-shadow(0 0 6px rgba(0, 255, 156, .7));
+}
+
+.prompt:focus-within {
+    background: linear-gradient(180deg, rgba(0, 255, 156, .03), rgba(0, 255, 156, .07));
+}
+.prompt:focus-within::before {
+    opacity: .9;
+    animation: promptPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes promptPulse {
+    0%, 100% { opacity: .55; }
+    50%      { opacity: 1; }
+}
+
+.ps1 {
+    color: var(--accent);
+    text-shadow:
+        0 0 10px rgba(0, 255, 156, .55),
+        0 0 2px rgba(0, 255, 156, .9);
+    white-space: nowrap;
+    font-size: 12.5px;
+    user-select: none;
+}
+
+#userInput {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    color: var(--fg-bright);
+    font: inherit;
+    caret-color: var(--accent);
+    text-shadow: 0 0 6px rgba(0, 255, 156, .18);
+    transition: text-shadow var(--t-med) var(--ease-out-soft);
+}
+#userInput::placeholder { color: var(--fg-mute); }
+#userInput:disabled { opacity: .55; }
+#userInput:focus {
+    text-shadow: 0 0 9px rgba(0, 255, 156, .35);
+}
+
+/* =========================================================
+   STATUS BAR
+   ========================================================= */
+.statusbar {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 7px 16px;
+    border-top: 1px solid var(--line);
+    background:
+        linear-gradient(180deg, rgba(0, 255, 156, .03), rgba(0, 255, 156, .012));
+    font-size: 10px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--fg-mute);
+    flex: none;
+}
+.statusbar > div { display: flex; gap: 16px; }
+.statusbar .ok {
+    color: var(--accent);
+    text-shadow: 0 0 8px rgba(0, 255, 156, .55);
+}
+
+/* =========================================================
+   TEXT SELECTION + FOCUS RING POLISH
+   ========================================================= */
+::selection {
+    background: rgba(0, 255, 156, .25);
+    color: var(--fg-bright);
+    text-shadow: 0 0 10px rgba(0, 255, 156, .55);
+}
+
+:focus-visible {
+    outline: 1px solid rgba(0, 255, 156, .45);
+    outline-offset: 2px;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 900px) {
+    body { padding: 10px; font-size: 12.5px; }
+    .app { height: 94vh; }
+    body::before { background-size: 32px 32px; }
+}
+@media (max-width: 560px) {
+    .topbar-right .hide-sm { display: none; }
+    .statusbar > div:last-child span:not(:last-child) { display: none; }
+    body::before { display: none; }
+    body::after  { opacity: .5; }
+}
+
+/* =========================================================
+   ACCESSIBILITY — respect reduced-motion preference
+   ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .001ms !important;
+        scroll-behavior: auto !important;
+    }
+    body::before,
+    body::after { animation: none; }
+    .sweep       { display: none; }
+}
+
+/* =========================================================
+   EXTENSION POINTS
+   ---------------------------------------------------------
+   Add styles for future components below.
+   Use the CSS variables from :root for theme consistency.
+   Suggested prefixes:
+     .panel-*     docked side panels
+     .window-*    floating / modal windows
+     .btn-*       buttons
+     .field-*     form inputs
+   ========================================================= */
